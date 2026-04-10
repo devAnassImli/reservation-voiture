@@ -1,38 +1,1028 @@
-.App {
+/* ============================================================
+   RÉSERVATION DE VOITURE — App.css
+   Styles qui reproduisent le design ASP.NET original
+   ============================================================ */
+
+/* ── Reset de base ── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ════════════════════════════════════════════
+   PAGE LOGIN (reproduit Default.aspx)
+   ════════════════════════════════════════════ */
+
+.login-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f4f8fb 0%, #e0e8f0 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  padding: 30px 16px;
+}
+
+.login-logos {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  color: #0F807A;
+}
+
+.logo-riva {
+  color: #0F807A;
+  font-weight: 800;
+  font-size: 28px;
+}
+
+.logo-sep {
+  color: #888;
+  font-size: 24px;
+}
+
+.logo-sam {
+  color: #555;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.login-banner {
+  background: linear-gradient(135deg, #0F807A 0%, #127a6e 100%);
+  width: 100%;
+  max-width: 2000px;
+  padding: 20px 0;
+  text-align: center;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(15, 128, 122, 0.3);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.login-test-info {
+  margin-top: 12px;
+  padding: 6px 16px;
+  background: #ffffcc;
+  border: 1px solid #eedd88;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  
+}
+
+.login-error {
+  margin-top: 12px;
+  padding: 10px 28px;
+  background: #cc0000;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 4px;
+  max-width: 2000px;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.login-main-panel {
+  margin-top: 20px;
+  background: #E6F2FF;
+  border: 1px solid #999;
+  border-radius: 4px;
+  padding: 28px 36px 36px;
+  width: 100%;
+  max-width: 2000px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.login-subtitle {
+  color: #3333CC;
+  font-size: 14px;
+  text-align: center;
+  margin: 8px 0 16px;
 }
 
-.App-header {
-  background-color: #282c34;
+.login-auth-panel {
+  background: #cccccc;
+  padding: 28px 36px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 2000px;
+}
+
+.login-field-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.login-label {
+  font-size: 15px;
+  width: 175px;
+  text-align: right;
+}
+
+.login-icon {
+  font-size: 20px;
+  width: 28px;
+  text-align: center;
+}
+
+.login-input {
+  height: 34px;
+  font-size: 15px;
+  text-align: center;
+  width: 260px;
+  border: 1px solid #999;
+  border-radius: 3px;
+  outline: none;
+  padding: 0 8px;
+  font-family: 'Trebuchet MS', sans-serif;
+  transition: background 0.2s;
+}
+
+/* Comme dans ton CSS ASP.NET : input:focus { background-color: yellow; } */
+.login-input:focus {
+  background-color: #ffffcc;
+}
+
+.login-password-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.login-eye {
+  position: absolute;
+  right: -30px;
+  top: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  user-select: none;
+}
+
+.login-btn-ok {
+  background: linear-gradient(135deg, #3366FF 0%, #2952cc 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  padding: 14px 60px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  margin-top: 8px;
+  box-shadow: 0 2px 6px rgba(51, 102, 255, 0.3);
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.login-btn-ok:hover {
+  transform: scale(1.02);
+}
+
+.login-btn-ok:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.change-msg-error {
+  color: #cc0000;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+}
+
+.change-msg-ok {
+  color: #008800;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+}
+
+.login-footer {
+  margin-top: 28px;
+  color: #999;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ════════════════════════════════════════════
+   LAYOUT (reproduit MasterPage.master)
+   ════════════════════════════════════════════ */
+
+.layout-container {
   min-height: 100vh;
+  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+}
+
+.layout-header {
+  background: linear-gradient(135deg, #1A7C78 0%, #145f5c 100%);
+  border-bottom: 3px solid #0d4a47;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.header-clock {
+  color: #fff;
+  font-weight: 700;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.header-center {
+  flex: 2;
+  text-align: center;
+}
+
+.header-subtitle {
+  font-size: 12px;
+  color: #cde6e5;
+}
+
+.header-title {
+  color: #fff;
+  font-weight: 700;
+  font-size: 24px;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+.header-right {
+  flex: 1;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.header-user {
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 700;
+  color: #fff;
+}
+
+.header-email {
+  font-size: 12px;
+  font-style: italic;
+  color: #cde6e5;
+}
+
+.header-logout-btn {
+  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.header-logout-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Menu ── */
+
+.menu-bar {
+  display: flex;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 0 24px;
+}
+
+.menu-parent {
+  position: relative;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.menu-parent:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.menu-parent-label {
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-radius: 0 0 6px 6px;
+  min-width: 220px;
+  z-index: 100;
+}
+
+.menu-child {
+  padding: 10px 20px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  transition: background 0.15s;
+}
+
+.menu-child:hover {
+  background: #f0f7f7;
+}
+
+.menu-child:last-child {
+  border-bottom: none;
+}
+
+/* ── Contenu page ── */
+
+.page-content {
+  padding: 20px 24px;
+}
+
+/* ════════════════════════════════════════════
+   PAGES
+   ════════════════════════════════════════════ */
+
+.page-panel {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 40px;
+  text-align: center;
+  min-height: 350px;
+}
+
+.page-title {
+  color: #555;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.page-text {
+  color: #888;
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+.home-status-box {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f0fff0;
+  border-radius: 6px;
+  border: 1px solid #bde0bd;
+  display: inline-block;
+  text-align: left;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.8;
+}
+
+/* ── Session expirée ── */
+
+.expired-container {
+  min-height: 100vh;
+  background: #1B4947;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  font-family: 'Trebuchet MS', sans-serif;
 }
 
-.App-link {
-  color: #61dafb;
+.expired-title {
+  color: #fff;
+  font-size: 28px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.expired-text {
+  color: #ccc;
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+/* ════════════════════════════════════════════
+   PAGE MARQUES AUTO (reproduit par_marche.aspx)
+   ════════════════════════════════════════════ */
+
+.marques-title {
+  color: #fff;
+  font-size: 20px;
+  background: #5A7085;
+  padding: 14px;
+  border-radius: 4px 4px 0 0;
+  margin: -40px -40px 20px -40px;
+}
+
+.marques-msg-error {
+  background: #ffdddd;
+  color: #cc0000;
+  border: 1px solid #cc0000;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.marques-msg-success {
+  background: #ddffdd;
+  color: #008800;
+  border: 1px solid #008800;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.marques-layout {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+/* ── Tableau (GridView) ── */
+
+.marques-table-container {
+  flex: 1;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #3366CC;
+  border-radius: 4px;
+}
+
+.marques-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.marques-table thead th {
+  background: #003399;
+  color: #CCCCFF;
+  font-weight: 700;
+  padding: 10px 8px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+}
+
+.marques-table tbody td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+  color: #003399;
+}
+
+.marques-table tbody tr:hover {
+  background: #e8f4f8;
+}
+
+.marques-table tbody tr.row-selected {
+  background: #009999;
+  color: #CCFF99;
+  font-weight: 700;
+}
+
+.marques-table tbody tr.row-selected td {
+  color: #CCFF99;
+}
+
+.btn-select {
+  background: #ffff00;
+  border: 1px solid #ccc;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 3px;
+}
+
+.btn-select:hover {
+  background: #ffee00;
+}
+
+/* ── Formulaire (droite) ── */
+
+.marques-form {
+  background: #5A7085;
+  padding: 24px;
+  border-radius: 4px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.marques-form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.marques-form-label {
+  color: #fff;
+  font-size: 14px;
+  min-width: 80px;
+}
+
+.marques-form-input {
+  height: 30px;
+  font-size: 14px;
+  padding: 0 8px;
+  border: 1px solid #999;
+  border-radius: 3px;
+  width: 200px;
+  outline: none;
+}
+
+.marques-form-input:focus {
+  background: #ffffcc;
+}
+
+.marques-form-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-insert {
+  background: #66CCFF;
+  border: none;
+  padding: 10px 20px;
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-insert:hover {
+  background: #44bbee;
+}
+
+.btn-delete {
+  background: #FF3300;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-delete:hover {
+  background: #dd2200;
+}
+
+.btn-cancel {
+  background: #ccc;
+  border: none;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  background: #bbb;
+}
+/* ════════════════════════════════════════════
+   PAGE MODÈLES AUTO (reproduit par_modelli.aspx)
+   ════════════════════════════════════════════ */
+
+.modeles-select {
+  height: 32px;
+  font-size: 14px;
+  padding: 0 8px;
+  border: 1px solid #999;
+  border-radius: 3px;
+  width: 210px;
+  outline: none;
+  background: #fff;
+  cursor: pointer;
+}
+
+.modeles-select:focus {
+  background: #ffffcc;
+}
+/* ════════════════════════════════════════════
+   PAGE PARC AUTO (reproduit par_auto.aspx)
+   ════════════════════════════════════════════ */
+
+.parc-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.parc-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.parc-checkbox-label {
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Badges de priorité (Riva, Formation, Transport) */
+.priorite-badge {
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.priorite-r {
+  background: #336699;
+}
+
+.priorite-f {
+  background: #cc8800;
+}
+
+.priorite-t {
+  background: #6633aa;
+}
+/* ════════════════════════════════════════════
+   PAGE NOUVELLE RÉSERVATION
+   ════════════════════════════════════════════ */
+
+.resa-layout {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.resa-form {
+  flex: 1;
+  background: #f8fafc;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 24px;
+}
+
+.resa-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 10px;
+}
+
+.resa-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+  min-width: 140px;
+  text-align: right;
+}
+
+.resa-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A7C78;
+  background: #e0f5f3;
+  padding: 6px 14px;
+  border-radius: 4px;
+}
+
+.resa-input {
+  height: 34px;
+  font-size: 14px;
+  padding: 0 10px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  outline: none;
+  width: 280px;
+  font-family: 'Trebuchet MS', sans-serif;
+}
+
+.resa-input:focus {
+  border-color: #1A7C78;
+  background: #fffff0;
+}
+
+.resa-input-date {
+  height: 34px;
+  font-size: 14px;
+  padding: 0 10px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  outline: none;
+  width: 180px;
+  font-family: 'Trebuchet MS', sans-serif;
+  cursor: pointer;
+}
+
+.resa-input-date:focus {
+  border-color: #1A7C78;
+  background: #fffff0;
+}
+
+.resa-select {
+  height: 36px;
+  font-size: 14px;
+  padding: 0 10px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  outline: none;
+  width: 320px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.resa-select:focus {
+  border-color: #1A7C78;
+}
+
+.resa-radio-group {
+  display: flex;
+  gap: 20px;
+}
+
+.resa-radio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #444;
+  cursor: pointer;
+}
+
+.resa-radio input {
+  cursor: pointer;
+}
+
+.resa-jours {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A7C78;
+  background: #e0f5f3;
+  padding: 6px 16px;
+  border-radius: 4px;
+}
+
+/* ── Voyageurs ── */
+
+.resa-voyageurs-section {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f0f4f8;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.resa-voyageurs-list {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.resa-voyageur-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.resa-voyageur-remove {
+  background: #ff4444;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.resa-voyageur-remove:hover {
+  background: #cc0000;
+}
+
+.resa-voyageur-add {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-add-voyageur {
+  background: #1A7C78;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-add-voyageur:hover {
+  background: #145f5c;
+}
+
+/* Bouton soumettre */
+
+.btn-submit-resa {
+  background: linear-gradient(135deg, #1A7C78, #0d5a57);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 16px 50px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(26, 124, 120, 0.3);
+  transition: transform 0.1s;
+}
+
+.btn-submit-resa:hover {
+  transform: scale(1.02);
+}
+
+/* ── Liste des réservations (colonne droite) ── */
+
+.resa-list {
+  width: 380px;
+  min-width: 380px;
+}
+
+.resa-list-title {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #1A7C78;
+}
+
+.resa-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.resa-card-header {
+  background: #1A7C78;
+  color: #fff;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.resa-card-body {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #444;
+  line-height: 1.7;
+}
+
+.resa-card-date {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #999;
+  font-style: italic;
+}
+/* ════════════════════════════════════════════
+   PAGE MODIFIER RÉSERVATION
+   ════════════════════════════════════════════ */
+
+.btn-back {
+  background: #667788;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.btn-back:hover {
+  background: #556677;
+}
+
+.detail-container {
+  max-width: 800px;
+}
+
+.detail-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.detail-header {
+  background: linear-gradient(135deg, #1A7C78, #145f5c);
+  color: #fff;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-body {
+  padding: 20px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: 700;
+  color: #555;
+  min-width: 130px;
+}
+
+.detail-date {
+  color: #999;
+  font-style: italic;
+  font-size: 12px;
+}
+
+.detail-actions {
+  padding: 16px 20px;
+  background: #f8f8f8;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid #eee;
+}
+
+/* Badge validation */
+.validation-badge {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.validation-badge.validated {
+  background: #d4edda;
+  color: #155724;
+}
+
+.validation-badge.pending {
+  background: #fff3cd;
+  color: #856404;
 }
