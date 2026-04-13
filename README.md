@@ -1,70 +1,201 @@
-# Getting Started with Create React App
+# 🚗 Réservation de Voiture — SAM Montereau
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Application de gestion de réservation de véhicules d'entreprise**
+Groupe Riva — Usine SAM Montereau — France
 
-## Available Scripts
+[![CI/CD Pipeline](https://github.com/devAnassImli/reservation-voiture/actions/workflows/ci.yml/badge.svg)](https://github.com/TON-PSEUDO/reservation-voiture/actions)
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 📋 Description
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Application web full-stack permettant la gestion complète du parc automobile et des réservations de véhicules pour les employés de l'usine SAM Montereau (Groupe Riva).
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Fonctionnalités
 
-### `npm test`
+- **Authentification sécurisée** avec JWT (JSON Web Token)
+- **Gestion du parc auto** : marques, modèles, véhicules
+- **Réservation de véhicules** avec vérification de disponibilité
+- **Gestion des voyageurs** par réservation
+- **Contrôle de disponibilité** croisé avec la maintenance
+- **Validation RH** des réservations
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🏗️ Architecture
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Architecture **3 couches** (three-tier architecture) :
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   FRONTEND      │     │   BACKEND       │     │   BASE DE       │
+│   React         │────▶│   Node.js       │────▶│   DONNÉES       │
+│   (port 3000)   │     │   Express       │     │   SQL Server    │
+│                 │     │   JWT           │     │                 │
+│   - Login       │     │   (port 5000)   │     │   7 tables      │
+│   - Dashboard   │     │                 │     │   28 PS         │
+│   - CRUD        │     │   5 routes API  │     │                 │
+│   - Réservation │     │   Middleware    │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Technologies utilisées
 
-### `npm run eject`
+| Couche             | Technologies                                   |
+| ------------------ | ---------------------------------------------- |
+| Frontend           | React 18, CSS3, JavaScript ES6+                |
+| Backend            | Node.js 20, Express.js, JWT, bcrypt            |
+| Base de données    | Microsoft SQL Server 2022, Stored Procedures   |
+| DevOps             | Docker, Docker Compose, GitHub Actions (CI/CD) |
+| Tests              | Jest, Supertest                                |
+| Gestion de version | Git, GitHub                                    |
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🚀 Démarrage rapide
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Prérequis
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installé
 
-## Learn More
+### Lancement (une seule commande)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+git clone https://github.com/devAnassImli/reservation-voiture.git
+cd reservation-voiture
+docker-compose up --build
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+L'application est accessible sur : **http://localhost:3000**
 
-### Code Splitting
+### Arrêt
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+docker-compose down
+```
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🔧 Développement local (sans Docker)
 
-### Making a Progressive Web App
+### Prérequis
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- Node.js 20+
+- SQL Server (accès au serveur de l'usine ou instance locale)
 
-### Advanced Configuration
+### Installation
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+# Frontend
+npm install
 
-### Deployment
+# Backend
+cd backend
+npm install
+cp .env.example .env   # Configurer la connexion SQL Server
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Lancement
 
-### `npm run build` fails to minify
+```bash
+# Terminal 1 : Backend
+cd backend
+node server.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# Terminal 2 : Frontend
+npm start
+```
+
+---
+
+## 🧪 Tests
+
+```bash
+cd backend
+npm test
+```
+
+Les tests couvrent :
+
+- Authentification (login, token JWT)
+- Sécurité (accès refusé sans token, token expiré)
+- CRUD Marques (création, doublon, suppression)
+- Validation des entrées (injection SQL, XSS)
+
+---
+
+## 📂 Structure du projet
+
+```
+reservation-voiture/
+├── .github/workflows/     CI/CD GitHub Actions
+├── backend/
+│   ├── config/            Configuration base de données
+│   ├── middleware/         Middleware JWT
+│   ├── routes/            Routes API REST
+│   ├── tests/             Tests unitaires
+│   ├── Dockerfile
+│   └── server.js          Point d'entrée API
+├── docker/
+│   ├── init-db.sql        Script initialisation BDD
+│   └── setup-db.sh        Script démarrage Docker
+├── src/
+│   ├── api/               Service d'appels API
+│   ├── components/        Composants réutilisables
+│   ├── context/           AuthContext (gestion session)
+│   └── pages/             Pages de l'application
+├── docker-compose.yml     Orchestration Docker
+├── Dockerfile             Build frontend
+└── nginx.conf             Configuration serveur web
+```
+
+---
+
+## 🔒 Sécurité
+
+- **JWT** : Toutes les routes API sont protégées par token
+- **Stored Procedures** : Prévention injection SQL (requêtes paramétrées)
+- **CORS** : Configuration des origines autorisées
+- **Validation** : Contrôle des entrées côté serveur
+- **RGPD** : Pas de stockage de données personnelles sensibles
+
+---
+
+## 📊 Base de données
+
+### Tables principales
+
+| Table           | Description               |
+| --------------- | ------------------------- |
+| utMarche        | Marques de véhicules      |
+| utModelli       | Modèles de véhicules      |
+| utAuto          | Parc automobile           |
+| utPrenotazioni  | Réservations              |
+| utVoyagers      | Voyageurs par réservation |
+| utManutenzioni  | Maintenances véhicules    |
+| utFicheControle | Fiches de contrôle        |
+
+### Stored Procedures (extrait)
+
+| Procédure                                     | Description                      |
+| --------------------------------------------- | -------------------------------- |
+| ai_insert_reservation                         | Créer une réservation            |
+| ai_get_voiture_flotte_complete                | Liste des véhicules par priorité |
+| ai_get_control_disponibilite_pour_reservation | Vérifier disponibilité           |
+| ai_insert_voyager                             | Ajouter un voyageur              |
+| ai_get_reservation_complete                   | Toutes les réservations          |
+
+---
+
+## 👤 Auteur
+
+**IMLI Anass** — Apprenti Concepteur Développeur d'Applications
+Usine SAM Montereau — Groupe Riva — France
+Bachelor CDA — 2025/2026
+
+---
+
+## 📄 Licence
+
+Projet réalisé dans le cadre d'un bachelor Concepteur Développeur d'Applications (CDA).
+Usage interne — Groupe Riva.

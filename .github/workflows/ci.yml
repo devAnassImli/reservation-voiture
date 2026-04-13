@@ -1,0 +1,86 @@
+# ============================================================
+#  .github/workflows/ci.yml — Pipeline CI/CD
+#
+#  COMPÉTENCE CP11 : Contribuer à la mise en production DevOps
+#
+#  Ce pipeline s'exécute automatiquement quand tu push sur GitHub.
+#  Il fait :
+#    1. Installe les dépendances
+#    2. Lance les tests unitaires
+#    3. Build le frontend React
+#    4. Vérifie que tout compile sans erreur
+#
+#  POUR LE JURY :
+#    "J'ai mis en place un pipeline CI/CD avec GitHub Actions.
+#     À chaque push, les tests sont exécutés automatiquement.
+#     Si un test échoue, le pipeline est rouge et je suis notifié.
+#     C'est de l'intégration continue dans une démarche DevOps."
+# ============================================================
+
+name: CI/CD Pipeline - Réservation de Voiture
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Job 1 : Tests du backend ──
+  test-backend:
+    name: Tests Backend API
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Installation des dépendances backend
+        working-directory: ./backend
+        run: npm install
+
+      - name: Exécution des tests unitaires
+        working-directory: ./backend
+        run: npm test
+        env:
+          JWT_SECRET: test_secret_ci_cd
+
+  # ── Job 2 : Build du frontend ──
+  build-frontend:
+    name: Build Frontend React
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Installation des dépendances frontend
+        run: npm install
+
+      - name: Build de production React
+        run: npm run build
+        env:
+          CI: false
+
+  # ── Job 3 : Vérification Docker ──
+  docker-check:
+    name: Vérification Docker
+    runs-on: ubuntu-latest
+    needs: [test-backend, build-frontend]
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Vérification docker-compose.yml
+        run: docker compose config --quiet
