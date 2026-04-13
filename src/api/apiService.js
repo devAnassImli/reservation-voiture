@@ -1,30 +1,48 @@
 // ─────────────────────────────────────────────
-// api/apiService.js — Tous les appels vers le backend
+// api/apiService.js — Avec envoi du token JWT
 //
-// Ce fichier centralise TOUS les appels fetch() vers l'API.
-// 
-// Équivalent de ConfigurationHelper.DBHelper.DoJob() en C#
+// AVANT : fetch sans authentification
+// MAINTENANT : chaque requête envoie le token dans le header
 //
-// En C# :
-//   DataSet ds = ConfigurationHelper.DBHelper.DoJob("get_marche", htValues);
+// Header envoyé :
+//   Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 //
-// En React :
-//   const marques = await apiService.getMarques();
-//
-// POURQUOI un fichier séparé ?
-//   - Si l'URL de l'API change, on modifie UN seul fichier
-//   - Si on ajoute JWT plus tard, on l'ajoute UN seul endroit
-//   - C'est de la bonne architecture en couches (CP6 !)
+// Si le token expire ou est invalide → 401/403 → déconnexion auto
 // ─────────────────────────────────────────────
 
-const API_URL = '/api';  // grâce au proxy, pas besoin de http://localhost:5000
+const API_URL = '/api';
+
+// ── Récupère le token stocké dans localStorage ──
+function getToken() {
+  return localStorage.getItem('rv_token');
+}
 
 // ── Fonction utilitaire pour les requêtes ──
 async function request(url, options = {}) {
+  const token = getToken();
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  // Ajoute le token JWT si on en a un
+  if (token) {
+    headers['Authorization'] = 'Bearer ' + token;
+  }
+
   const response = await fetch(API_URL + url, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers,
   });
+
+  // Si 401 ou 403 → token expiré → déconnexion
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem('rv_user');
+    localStorage.removeItem('rv_token');
+    window.location.reload(); // force retour au login
+    throw new Error('SESSION EXPIRÉE — Reconnectez-vous');
+  }
 
   const data = await response.json();
 
@@ -44,6 +62,10 @@ export async function login(username, password) {
     method: 'POST',
     body: JSON.stringify({ username, password }),
   });
+}
+
+export async function loginDemo() {
+  return request('/auth/demo', { method: 'POST' });
 }
 
 // ══════════════════════════════════════

@@ -1,6 +1,11 @@
 // ─────────────────────────────────────────────
-// AuthContext.js
-// Gère l'authentification (remplace les Session ASP.NET)
+// AuthContext.js — Avec stockage du token JWT
+//
+// AVANT : on stockait juste les infos user
+// MAINTENANT : on stocke aussi le token JWT
+//
+// Le token est envoyé avec chaque requête API
+// pour prouver qu'on est connecté.
 // ─────────────────────────────────────────────
 
 import { createContext, useContext, useState } from "react";
@@ -17,18 +22,32 @@ export function AuthProvider({ children }) {
     }
   });
 
-  const login = (userData) => {
+  const [token, setToken] = useState(() => {
+    try {
+      return localStorage.getItem("rv_token") || null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Login : stocke user + token
+  const login = (userData, jwtToken) => {
     setUser(userData);
+    setToken(jwtToken);
     localStorage.setItem("rv_user", JSON.stringify(userData));
+    if (jwtToken) localStorage.setItem("rv_token", jwtToken);
   };
 
+  // Logout : supprime tout
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem("rv_user");
+    localStorage.removeItem("rv_token");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

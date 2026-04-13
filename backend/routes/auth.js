@@ -1,23 +1,16 @@
 // ─────────────────────────────────────────────
-// routes/auth.js — Authentification
+// routes/auth.js — Authentification avec JWT
 //
-// Équivalent de Default.aspx.cs → btnOK_Click
+// AVANT : retournait juste les infos user
+// MAINTENANT : retourne un TOKEN JWT signé
 //
-// En C# :
-//   var dic = ClassTools.AutenticazioneDominio(username, password);
-//   → appelle LDAP puis UP_GET_AUTENTICAZIONE_ESTERNA
-//
-// En Node.js :
-//   POST /api/auth/login { username, password }
-//   → appelle UP_GET_AUTENTICAZIONE_ESTERNA (pour les utilisateurs externes)
-//   → retourne les infos utilisateur
-//
-// POUR L'INSTANT : on fait une authentification simple
-// EN PHASE 2 : on ajoutera JWT (token sécurisé)
+// Le token contient les infos user (encodées)
+// et expire après 8 heures.
 // ─────────────────────────────────────────────
 
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const { sql, getPool } = require('../config/db');
 
 // POST /api/auth/login
@@ -25,7 +18,6 @@ router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Validation des champs
     if (!username || !password) {
       return res.status(400).json({
         success: false,
@@ -35,8 +27,7 @@ router.post('/login', async (req, res) => {
 
     const pool = await getPool();
 
-    // Appel de la stored procedure UP_GET_AUTENTICAZIONE_ESTERNA
-    // Comme dans ton C# : ConfigurationHelper.DBHelper.DoJob("GET_AUTENTICAZIONE_ESTERNA", htValues)
+    // Appel de la stored procedure
     const result = await pool.request()
       .input('Username', sql.NVarChar, username.trim())
       .input('Pwd', sql.NVarChar, password.trim())
@@ -51,26 +42,60 @@ router.post('/login', async (req, res) => {
 
     const user = result.recordset[0];
 
-    // Retourne les infos utilisateur
-    // Comme Session["S_CognomeNome"] = dic.Item4; etc.
+    // Données à mettre dans le token
+    const userData = {
+      idUtente: user.IdUtente,
+      cognomeNome: user.CognomeNome ? user.CognomeNome.trim() : '',
+      email: user.Email ? user.Email.trim() : '',
+      codice: user.Codice,
+      tipoIngresso: user.UtenteEsterno === 1 ? '2' : '1',
+    };
+
+    // ── CRÉER LE TOKEN JWT ──
+    // jwt.sign(données, clé_secrète, options)
+    // Le token expire après 8h (une journée de travail)
+    const token = jwt.sign(userData, process.env.JWT_SECRET, {
+      expiresIn: '8h'
+    });
+
+    console.log('✅ Login réussi:', userData.cognomeNome);
+
+    // Retourne le token + les infos user
     res.json({
       success: true,
-      data: {
-        idUtente: user.IdUtente,
-        cognomeNome: user.CognomeNome ? user.CognomeNome.trim() : '',
-        email: user.Email ? user.Email.trim() : '',
-        codice: user.Codice,
-        tipoIngresso: user.UtenteEsterno === 1 ? '2' : '1',
-      }
+      token: token,    // ← NOUVEAU : le token JWT
+      data: userData,
     });
 
   } catch (err) {
-    console.error('Erreur login:', err.message);
+    console.error('❌ Erreur login:', err.message);
     res.status(500).json({
       success: false,
       error: 'ERREUR SERVEUR: ' + err.message
     });
   }
+});
+
+// POST /api/auth/demo — Mode démo (sans base de données)
+// Permet de tester l'app même sans la SP d'authentification
+router.post('/demo', (req, res) => {
+  const userData = {
+    idUtente: 0,
+    cognomeNome: 'IMLI Anass',
+    email: 'anass.imli@rivagroup.com',
+    codice: '1',
+    tipoIngresso: '1',
+  };
+
+  const token = jwt.sign(userData, process.env.JWT_SECRET, {
+    expiresIn: '8h'
+  });
+
+  res.json({
+    success: true,
+    token: token,
+    data: userData,
+  });
 });
 
 module.exports = router;
