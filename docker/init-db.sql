@@ -1644,4 +1644,54 @@ BEGIN
     SET NOCOUNT ON;
     DELETE FROM [dbo].[utAuto] WHERE IdAuto = @IdAuto
 END
+-- Table des utilisateurs
+CREATE TABLE [dbo].[utUtenti](
+    [IdUtente] [int] IDENTITY(1,1) NOT NULL,
+    [Username] [nvarchar](50) NOT NULL,
+    [Pwd] [nvarchar](100) NOT NULL,
+    [CognomeNome] [nvarchar](100) NULL,
+    [Email] [nvarchar](100) NULL,
+    [Role] [nvarchar](20) NOT NULL DEFAULT 'employe',
+    [Attivo] [bit] NOT NULL DEFAULT 1,
+    CONSTRAINT [PK_utUtenti] PRIMARY KEY ([IdUtente])
+);
+GO
+CREATE TABLE [dbo].[utUtenti](
+    [IdUtente] [int] IDENTITY(1,1) NOT NULL,
+    [Username] [nvarchar](50) NOT NULL,
+    [Pwd] [nvarchar](100) NOT NULL,
+    [CognomeNome] [nvarchar](100) NULL,
+    [Email] [nvarchar](100) NULL,
+    [Role] [nvarchar](20) NOT NULL DEFAULT 'employe',
+    [Attivo] [bit] NOT NULL DEFAULT 1,
+    CONSTRAINT [PK_utUtenti] PRIMARY KEY ([IdUtente])
+);
+GO
+CREATE OR ALTER PROCEDURE [dbo].[UP_GET_AUTENTICAZIONE_ESTERNA]
+    @Username nvarchar(50),
+    @Pwd nvarchar(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT IdUtente, Username, CognomeNome, Email, Role, Attivo
+    FROM [dbo].[utUtenti]
+    WHERE Username = @Username AND Pwd = @Pwd AND Attivo = 1
+END
+GO
+
+INSERT INTO utUtenti (Username, Pwd, CognomeNome, Email, Role) VALUES
+('anass.imli', 'Montereau05@@', 'IMLI Anass', 'anass.imli@rivagroup.com', 'admin');
+GO
+INSERT INTO utUtenti (Username, Pwd, CognomeNome, Email, Role) VALUES
+('marie.dupont', 'test123', 'DUPONT Marie', 'marie.dupont@rivagroup.com', 'employe');
+GO
+INSERT INTO utUtenti (Username, Pwd, CognomeNome, Email, Role) VALUES
+('jean.martin', 'test123', 'MARTIN Jean', 'jean.martin@rivagroup.com', 'employe');
+GO
+INSERT INTO utUtenti (Username, Pwd, CognomeNome, Email, Role) VALUES
+('pierre.gardien', 'test123', 'GARDIEN Pierre', 'pierre.gardien@rivagroup.com', 'gardien');
+GO
+INSERT INTO utUtenti (Username, Pwd, CognomeNome, Email, Role) VALUES
+('sophie.rh', 'test123', 'RH Sophie', 'sophie.rh@rivagroup.com', 'rh');
+GO
 GO
