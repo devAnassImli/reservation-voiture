@@ -142,6 +142,18 @@ function LoginPage({ onNavigate }) {
       </div>
       <p className="login-footer">
         <em>Groupe Riva — SAM Montereau — vers. 2.0 React — 🔒 JWT</em>
+        <br />
+        <span
+          onClick={() => onNavigate("rgpd")}
+          style={{
+            color: "#2E75B6",
+            cursor: "pointer",
+            fontSize: 11,
+            textDecoration: "underline",
+          }}
+        >
+          Mentions légales et protection des données (RGPD)
+        </span>
       </p>
     </div>
   );

@@ -12,6 +12,7 @@
 
 import { useState, useEffect } from "react";
 import './App.css';
+import RgpdPage from "./pages/RgpdPage";
 
 // Imports des composants
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -66,6 +67,7 @@ function AppContent({ page, setPage }) {
     "parc-auto": <ParcAutoPage />,
     "reservation-new": <NewReservationPage />,
     "reservation-edit": <EditReservationPage />,
+     "rgpd": <RgpdPage />,    
   };
 
   return (
