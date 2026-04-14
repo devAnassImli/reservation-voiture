@@ -17,9 +17,42 @@
 function RgpdPage({ onNavigate }) {
   return (
     <div
-      className="page-panel"
-      style={{ textAlign: "left", maxWidth: 800, margin: "0 auto" }}
+      style={{
+        maxWidth: 800,
+        margin: "40px auto",
+        background: "#fff",
+        borderRadius: 12,
+        boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+        border: "1px solid #ddd",
+        position: "relative",
+        padding: "30px 30px 20px",
+        textAlign: "left",
+      }}
     >
+      <button
+        onClick={() => onNavigate("login")}
+        style={{
+          position: "absolute",
+          top: -14,
+          right: -14,
+          background: "#dc3545",
+          color: "#fff",
+          border: "3px solid #fff",
+          borderRadius: "50%",
+          width: 36,
+          height: 36,
+          fontSize: 20,
+          fontWeight: 700,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+        }}
+        title="Fermer"
+      >
+        ✕
+      </button>
       <h2 className="marques-title">
         MENTIONS LÉGALES ET PROTECTION DES DONNÉES
       </h2>

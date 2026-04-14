@@ -15,7 +15,6 @@ function LoginPage({ onNavigate }) {
     usernameRef.current?.focus();
   }, []);
 
-  // ── Login classique (avec identifiants) ──
   const handleLogin = async () => {
     setError("");
     if (!username.trim() || !password.trim()) {
@@ -31,8 +30,6 @@ function LoginPage({ onNavigate }) {
         setLoading(false);
         return;
       }
-
-      // Stocke user + token JWT
       login(result.data, result.token);
       onNavigate("home");
     } catch (err) {
@@ -42,7 +39,6 @@ function LoginPage({ onNavigate }) {
     }
   };
 
-  // ── Login mode démo (sans mot de passe) ──
   const handleDemoLogin = async () => {
     setError("");
     setLoading(true);
@@ -62,27 +58,131 @@ function LoginPage({ onNavigate }) {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-logos">
-        <span className="logo-riva">RIVA</span>
-        <span className="logo-sep">•</span>
-        <span className="logo-sam">SAM MONTEREAU</span>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#ffffff",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        paddingTop: 30,
+      }}
+    >
+      {/* ── Logos ── */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 30,
+          marginBottom: 16,
+        }}
+      >
+        <img
+          src="/logo_riva.png"
+          alt="Logo Riva"
+          style={{ height: 110, objectFit: "contain" }}
+        />
+        <img
+          src="/logo_sam.png"
+          alt="Logo SAM Montereau"
+          style={{ height: 90, objectFit: "contain" }}
+        />
       </div>
-      <div className="login-banner">RÉSERVATION DE VOITURE</div>
-      {error && <div className="login-error">{error}</div>}
-      <div className="login-main-panel">
-        <p className="login-subtitle">
-          <em>
-            entrez votre nom d'utilisateur et votre mot de passe pour le domaine
-            SAM Montereau ou vos identifiants externes
-          </em>
+
+      {/* ── Bannière verte ── */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #2a7a6a 0%, #3a9a8a 100%)",
+          color: "#fff",
+          fontSize: 30,
+          fontWeight: 700,
+          letterSpacing: 3,
+          textAlign: "center",
+          padding: "18px 80px",
+          width: "100%",
+          maxWidth: 900,
+          marginBottom: 30,
+        }}
+      >
+        RÉSERVATION DE VOITURE
+      </div>
+
+      {/* ── Panneau principal ── */}
+      <div
+        style={{
+          background: "#d6e4f0",
+          border: "1px solid #a0b8cc",
+          borderRadius: 4,
+          padding: "30px 40px",
+          width: "100%",
+          maxWidth: 850,
+        }}
+      >
+        {/* Sous-titre */}
+        <p
+          style={{
+            textAlign: "center",
+            color: "#2a7a6a",
+            fontSize: 16,
+            fontStyle: "italic",
+            marginBottom: 24,
+          }}
+        >
+          entrez votre nom d'utilisateur et votre mot de passe pour le domaine
+          SAM Montereau ou vos identifiants externes
         </p>
-        <div className="login-auth-panel">
-          <div className="login-field-row">
-            <label className="login-label">
-              <em>Nom d'utilisateur:</em>
+
+        {/* Erreur */}
+        {error && (
+          <div
+            style={{
+              background: "#fde8e8",
+              color: "#c53030",
+              padding: "10px 16px",
+              borderRadius: 4,
+              fontSize: 14,
+              fontWeight: 600,
+              textAlign: "center",
+              marginBottom: 16,
+              borderLeft: "4px solid #c53030",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* Formulaire gris */}
+        <div
+          style={{
+            background: "#c8c8c8",
+            padding: "30px 40px",
+            borderRadius: 4,
+            border: "1px solid #aaa",
+          }}
+        >
+          {/* Nom d'utilisateur */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: 16,
+              justifyContent: "center",
+            }}
+          >
+            <label
+              style={{
+                fontSize: 15,
+                fontWeight: 600,
+                color: "#333",
+                width: 160,
+                textAlign: "right",
+                marginRight: 10,
+              }}
+            >
+              Nom d'utilisateur:
             </label>
-            <span className="login-icon">👤</span>
+            <span style={{ marginRight: 6, fontSize: 16 }}>👤</span>
             <input
               ref={usernameRef}
               type="text"
@@ -90,71 +190,135 @@ function LoginPage({ onNavigate }) {
               onChange={(e) => setUsername(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="prénom.nom"
-              className="login-input"
+              style={{
+                width: 260,
+                padding: "8px 12px",
+                fontSize: 15,
+                border: "1px solid #999",
+                borderRadius: 2,
+                background: "#fffde8",
+              }}
             />
           </div>
-          <div className="login-field-row">
-            <label className="login-label">
-              <em>Mot de passe:</em>
+
+          {/* Mot de passe */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: 24,
+              justifyContent: "center",
+            }}
+          >
+            <label
+              style={{
+                fontSize: 15,
+                fontWeight: 600,
+                color: "#333",
+                width: 160,
+                textAlign: "right",
+                marginRight: 10,
+              }}
+            >
+              Mot de passe:
             </label>
-            <span className="login-icon">🔒</span>
-            <div className="login-password-wrapper">
+            <span style={{ marginRight: 6, fontSize: 16 }}>🔒</span>
+            <div style={{ position: "relative", width: 260 }}>
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="mot de passe"
-                className="login-input"
+                style={{
+                  width: "100%",
+                  padding: "8px 36px 8px 12px",
+                  fontSize: 15,
+                  border: "1px solid #999",
+                  borderRadius: 2,
+                  background: "#fffde8",
+                  boxSizing: "border-box",
+                }}
               />
               <span
-                className="login-eye"
                 onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  cursor: "pointer",
+                  fontSize: 16,
+                  opacity: 0.6,
+                }}
               >
                 {showPassword ? "🙈" : "👁"}
               </span>
             </div>
           </div>
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="login-btn-ok"
-          >
-            {loading ? "Connexion..." : "OK"}
-          </button>
-          <button
-            onClick={handleDemoLogin}
-            disabled={loading}
+
+          {/* Boutons */}
+          <div
             style={{
-              marginTop: 4,
-              background: "#667788",
-              color: "#fff",
-              border: "none",
-              borderRadius: 4,
-              padding: "8px 30px",
-              cursor: "pointer",
-              fontSize: 12,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 10,
             }}
           >
-            Mode démo (sans mot de passe)
-          </button>
+            <button
+              onClick={handleLogin}
+              disabled={loading}
+              style={{
+                background: "#2E75B6",
+                color: "#fff",
+                border: "none",
+                borderRadius: 4,
+                padding: "12px 60px",
+                fontSize: 16,
+                fontWeight: 700,
+                cursor: "pointer",
+                letterSpacing: 1,
+              }}
+            >
+              {loading ? "Connexion..." : "OK"}
+            </button>
+            <button
+              onClick={handleDemoLogin}
+              disabled={loading}
+              style={{
+                background: "transparent",
+                color: "#555",
+                border: "1px solid #888",
+                borderRadius: 4,
+                padding: "8px 30px",
+                fontSize: 12,
+                cursor: "pointer",
+              }}
+            >
+              Mode démonstration (sans mot de passe)
+            </button>
+          </div>
         </div>
       </div>
-      <p className="login-footer">
-        <em>Groupe Riva — SAM Montereau — vers. 2.0 React — 🔒 JWT</em>
-        <br />
+
+      {/* ── Footer ── */}
+      <div style={{ marginTop: 20, textAlign: "center" }}>
+        <p style={{ fontSize: 11, color: "#666", marginBottom: 6 }}>
+          Groupe Riva — Usine SAM Montereau — France — Version 2.0 React/Node.js
+          — 🔒 JWT
+        </p>
         <span
           onClick={() => onNavigate("rgpd")}
           style={{
+            fontSize: 12,
             color: "#2E75B6",
             cursor: "pointer",
-            fontSize: 11,
             textDecoration: "underline",
           }}
         >
           Mentions légales et protection des données (RGPD)
         </span>
-      </p>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 // ============================================================
 //  App.js — Le chef d'orchestre
-//  
+//
 //  Ce fichier est maintenant PROPRE et PETIT.
 //  Il ne fait que 2 choses :
 //    1. Importer tous les composants
@@ -11,7 +11,7 @@
 // ============================================================
 
 import { useState, useEffect } from "react";
-import './App.css';
+import "./App.css";
 import RgpdPage from "./pages/RgpdPage";
 
 // Imports des composants
@@ -41,7 +41,12 @@ function AppContent({ page, setPage }) {
 
   // Si pas connecté → redirige vers login
   useEffect(() => {
-    if (!user && page !== "login" && page !== "session-expired") {
+    if (
+      !user &&
+      page !== "login" &&
+      page !== "session-expired" &&
+      page !== "rgpd"
+    ) {
       setPage("login");
     }
   }, [user, page, setPage]);
@@ -57,7 +62,9 @@ function AppContent({ page, setPage }) {
   if (page === "login") return <LoginPage onNavigate={setPage} />;
 
   // Page session expirée (sans Layout)
-  if (page === "session-expired") return <SessionExpiredPage onNavigate={setPage} />;
+  if (page === "session-expired")
+    return <SessionExpiredPage onNavigate={setPage} />;
+  if (page === "rgpd") return <RgpdPage onNavigate={setPage} />;
 
   // Toutes les autres pages avec le Layout (MasterPage)
   const pages = {
@@ -67,14 +74,10 @@ function AppContent({ page, setPage }) {
     "parc-auto": <ParcAutoPage />,
     "reservation-new": <NewReservationPage />,
     "reservation-edit": <EditReservationPage />,
-     "rgpd": <RgpdPage />,    
+    rgpd: <RgpdPage onNavigate={setPage} />,
   };
 
-  return (
-    <Layout onNavigate={setPage}>
-      {pages[page] || <HomePage />}
-    </Layout>
-  );
+  return <Layout onNavigate={setPage}>{pages[page] || <HomePage />}</Layout>;
 }
 
 export default App;
