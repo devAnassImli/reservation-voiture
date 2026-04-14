@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import * as api from "../api/apiService";
 
 function EditReservationPage() {
+  const { user } = useAuth();
+  const role = user?.role || "employe";
+
   const [reservations, setReservations] = useState([]);
   const [viewMode, setViewMode] = useState("list");
   const [selectedResa, setSelectedResa] = useState(null);
@@ -38,25 +42,24 @@ function EditReservationPage() {
 
   const handleStartEdit = (r) => {
     setSelectedResa(r);
-    const formatDate = (d) => {
+    const fmt = (d) => {
       if (!d) return "";
       return new Date(d).toISOString().split("T")[0];
     };
-    setEditDateDebut(formatDate(r.DataInizio));
-    setEditDateFin(formatDate(r.DataFine));
+    setEditDateDebut(fmt(r.DataInizio));
+    setEditDateFin(fmt(r.DataFine));
     setEditDestination(r.Destinazione);
     setEditKm(r.KmEstime ? r.KmEstime.toString() : "");
     setViewMode("edit");
     setMessage("");
   };
 
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = () => {
     if (!editDateDebut || !editDateFin || !editDestination.trim()) {
       setMessage("REMPLISSEZ TOUS LES CHAMPS");
       setMessageType("error");
       return;
     }
-    // Pour l'instant, mise à jour locale (on ajoutera la SP de update plus tard)
     const jours =
       Math.ceil(
         (new Date(editDateFin) - new Date(editDateDebut)) /
@@ -67,7 +70,6 @@ function EditReservationPage() {
       setMessageType("error");
       return;
     }
-
     setReservations(
       reservations.map((r) => {
         if (r.IdPrenotazione === selectedResa.IdPrenotazione) {
@@ -107,14 +109,21 @@ function EditReservationPage() {
     setMessage("");
   };
 
+  const canEdit = (r) => {
+    if (role === "admin") return true;
+    if (role === "employe" && r.UtentePrenotazione === user?.cognomeNome)
+      return true;
+    return false;
+  };
+
   const renderValidation = (val) => {
     if (val === 1)
-      return <span className="validation-badge validated">✅ Validée</span>;
-    return <span className="validation-badge pending">⏳ En attente</span>;
+      return <span className="validation-badge validated">Validee</span>;
+    return <span className="validation-badge pending">En attente</span>;
   };
 
   const formatDate = (d) => {
-    if (!d) return "—";
+    if (!d) return "-";
     try {
       return new Date(d).toLocaleDateString("fr-FR");
     } catch {
@@ -122,18 +131,21 @@ function EditReservationPage() {
     }
   };
 
+  const pageTitle =
+    role === "employe" ? "MES RESERVATIONS" : "GESTION DES RESERVATIONS";
+
   if (loading)
     return (
       <div className="page-panel">
         <p style={{ textAlign: "center", color: "#888", padding: 40 }}>
-          Chargement des réservations...
+          Chargement...
         </p>
       </div>
     );
 
   return (
     <div className="page-panel" style={{ textAlign: "left" }}>
-      <h2 className="marques-title">GESTION DES RÉSERVATIONS</h2>
+      <h2 className="marques-title">{pageTitle}</h2>
       {message && (
         <div
           className={
@@ -147,20 +159,21 @@ function EditReservationPage() {
       )}
 
       {viewMode === "list" && (
-        <>
+        <div>
           <p style={{ color: "#666", fontSize: 13, marginBottom: 12 }}>
-            {reservations.length} réservation
+            {reservations.length} reservation
             {reservations.length > 1 ? "s" : ""}
+            {role === "employe" && " (vos reservations uniquement)"}
           </p>
           <div className="marques-table-container" style={{ maxHeight: 500 }}>
             <table className="marques-table">
               <thead>
                 <tr>
                   <th style={{ width: 70 }}>ACTIONS</th>
-                  <th style={{ width: 50 }}>N°</th>
+                  <th style={{ width: 50 }}>N</th>
                   <th>VOITURE</th>
                   <th>PLAQUE</th>
-                  <th>DEMANDEUR</th>
+                  {(role === "admin" || role === "rh") && <th>DEMANDEUR</th>}
                   <th>DU</th>
                   <th>AU</th>
                   <th>JOURS</th>
@@ -175,9 +188,8 @@ function EditReservationPage() {
                       <button
                         className="btn-select"
                         onClick={() => handleViewDetail(r)}
-                        title="Voir détails"
                       >
-                        👁
+                        Voir
                       </button>
                     </td>
                     <td>
@@ -189,7 +201,9 @@ function EditReservationPage() {
                     <td>
                       <strong>{r.Targa}</strong>
                     </td>
-                    <td>{r.UtentePrenotazione}</td>
+                    {(role === "admin" || role === "rh") && (
+                      <td>{r.UtentePrenotazione}</td>
+                    )}
                     <td>{formatDate(r.DataInizio)}</td>
                     <td>{formatDate(r.DataFine)}</td>
                     <td>{r.Giorni}</td>
@@ -202,24 +216,24 @@ function EditReservationPage() {
                 {reservations.length === 0 && (
                   <tr>
                     <td colSpan={10} style={{ color: "#999", padding: 20 }}>
-                      Aucune réservation
+                      Aucune reservation
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-        </>
+        </div>
       )}
 
       {viewMode === "detail" && selectedResa && (
         <div className="detail-container">
           <button onClick={handleBackToList} className="btn-back">
-            ← Retour à la liste
+            Retour a la liste
           </button>
           <div className="detail-card">
             <div className="detail-header">
-              Réservation N° {selectedResa.ProgressivoPrenotazione}/
+              Reservation N {selectedResa.ProgressivoPrenotazione}/
               {selectedResa.AnnoPrenotazione}{" "}
               {renderValidation(selectedResa.ValidationRH)}
             </div>
@@ -227,7 +241,7 @@ function EditReservationPage() {
               <div className="detail-row">
                 <span className="detail-label">Voiture :</span>
                 <span>
-                  {selectedResa.Marca} {selectedResa.Modello} —{" "}
+                  {selectedResa.Marca} {selectedResa.Modello} -{" "}
                   <strong>{selectedResa.Targa}</strong>
                 </span>
               </div>
@@ -236,9 +250,9 @@ function EditReservationPage() {
                 <span>{selectedResa.UtentePrenotazione}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Période :</span>
+                <span className="detail-label">Periode :</span>
                 <span>
-                  {formatDate(selectedResa.DataInizio)} →{" "}
+                  {formatDate(selectedResa.DataInizio)} au{" "}
                   {formatDate(selectedResa.DataFine)} ({selectedResa.Giorni}{" "}
                   jour{selectedResa.Giorni > 1 ? "s" : ""})
                 </span>
@@ -251,8 +265,8 @@ function EditReservationPage() {
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Km estimé :</span>
-                <span>{selectedResa.KmEstime || "—"}</span>
+                <span className="detail-label">Km estime :</span>
+                <span>{selectedResa.KmEstime || "-"}</span>
               </div>
               {selectedResa.Voyageurs && selectedResa.Voyageurs.length > 0 && (
                 <div className="detail-row">
@@ -262,18 +276,29 @@ function EditReservationPage() {
               )}
             </div>
             <div className="detail-actions">
-              <button
-                onClick={() => handleStartEdit(selectedResa)}
-                className="btn-insert"
-              >
-                ✏️ MODIFIER
-              </button>
-              <button
-                onClick={() => handleDelete(selectedResa.IdPrenotazione)}
-                className="btn-delete"
-              >
-                🗑 SUPPRIMER
-              </button>
+              {canEdit(selectedResa) ? (
+                <div>
+                  <button
+                    onClick={() => handleStartEdit(selectedResa)}
+                    className="btn-insert"
+                  >
+                    MODIFIER
+                  </button>
+                  <button
+                    onClick={() => handleDelete(selectedResa.IdPrenotazione)}
+                    className="btn-delete"
+                    style={{ marginLeft: 8 }}
+                  >
+                    SUPPRIMER
+                  </button>
+                </div>
+              ) : (
+                <span
+                  style={{ color: "#888", fontSize: 13, fontStyle: "italic" }}
+                >
+                  Consultation uniquement
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -282,23 +307,23 @@ function EditReservationPage() {
       {viewMode === "edit" && selectedResa && (
         <div className="detail-container">
           <button onClick={handleBackToList} className="btn-back">
-            ← Retour à la liste
+            Retour a la liste
           </button>
           <div className="detail-card">
             <div className="detail-header">
-              Modifier Réservation N° {selectedResa.ProgressivoPrenotazione}/
+              Modifier Reservation N {selectedResa.ProgressivoPrenotazione}/
               {selectedResa.AnnoPrenotazione}
             </div>
             <div className="detail-body">
               <div className="detail-row">
                 <span className="detail-label">Voiture :</span>
                 <span>
-                  {selectedResa.Marca} {selectedResa.Modello} —{" "}
+                  {selectedResa.Marca} {selectedResa.Modello} -{" "}
                   {selectedResa.Targa}
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Date début :</span>
+                <span className="detail-label">Date debut :</span>
                 <input
                   type="date"
                   value={editDateDebut}
@@ -326,7 +351,7 @@ function EditReservationPage() {
                 />
               </div>
               <div className="detail-row">
-                <span className="detail-label">Km estimé :</span>
+                <span className="detail-label">Km estime :</span>
                 <input
                   type="number"
                   value={editKm}
@@ -342,9 +367,13 @@ function EditReservationPage() {
                 className="btn-submit-resa"
                 style={{ padding: "12px 40px", fontSize: 14 }}
               >
-                💾 SAUVEGARDER
+                SAUVEGARDER
               </button>
-              <button onClick={handleBackToList} className="btn-cancel">
+              <button
+                onClick={handleBackToList}
+                className="btn-cancel"
+                style={{ marginLeft: 8 }}
+              >
                 ANNULER
               </button>
             </div>

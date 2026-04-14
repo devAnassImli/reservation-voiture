@@ -1,24 +1,41 @@
 // ─────────────────────────────────────────────
-// routes/reservations.js — CRUD Réservations
+// routes/reservations.js — Avec filtrage par rôle
 //
-// Utilise tes stored procedures :
-//   ai_get_reservation_complete          → GET /api/reservations
-//   ai_get_progressivo_prenotazione      → numéro auto
-//   ai_insert_reservation                → POST /api/reservations
-//   ai_insert_voyager                    → POST (avec la réservation)
-//   ai_get_voyagers_pour_guid_table      → GET voyageurs
-//   ai_get_reservation_complete_pour_idPrenotazione → GET /api/reservations/:id
+// LOGIQUE :
+//   - admin / rh → voit TOUTES les réservations
+//   - employe    → voit UNIQUEMENT ses réservations
+//   - gardien    → voit les réservations en cours
+//
+// Le rôle vient du JWT (req.user.role)
 // ─────────────────────────────────────────────
 
 const express = require("express");
 const router = express.Router();
 const { sql, getPool } = require("../config/db");
 
-// GET /api/reservations — Liste toutes les réservations
+// GET /api/reservations — Filtrées selon le rôle
 router.get("/", async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await pool.request().execute("ai_get_reservation_complete");
+    const role = req.user.role || "employe";
+    const userName = req.user.cognomeNome || "";
+
+    let result;
+
+    if (role === "admin" || role === "rh") {
+      // Admin et RH voient TOUT
+      result = await pool.request().execute("ai_get_reservation_complete");
+    } else if (role === "gardien") {
+      // Gardien voit les réservations en cours
+      result = await pool.request().execute("ai_visualiser_reservation");
+    } else {
+      // Employé voit uniquement SES réservations
+      result = await pool.request().execute("ai_get_reservation_complete");
+      // Filtre côté serveur par le nom de l'utilisateur
+      result.recordset = result.recordset.filter(
+        (r) => r.UtentePrenotazione && r.UtentePrenotazione.trim() === userName,
+      );
+    }
 
     const reservations = result.recordset.map((row) => ({
       IdPrenotazione: row.IdPrenotazione,
@@ -43,7 +60,7 @@ router.get("/", async (req, res) => {
       InsertData: row.InsertData,
     }));
 
-    // Pour chaque réservation, récupérer les voyageurs
+    // Voyageurs pour chaque réservation
     for (let resa of reservations) {
       if (resa.GuidTable) {
         try {
@@ -51,7 +68,6 @@ router.get("/", async (req, res) => {
             .request()
             .input("GuidTable", sql.NVarChar, resa.GuidTable)
             .execute("ai_get_voyagers_pour_guid_table");
-
           resa.Voyageurs = voyResult.recordset.map((v) =>
             v.Voyager ? v.Voyager.trim() : "",
           );
@@ -70,7 +86,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /api/reservations/:id — Une réservation par ID
+// GET /api/reservations/:id
 router.get("/:id", async (req, res) => {
   try {
     const pool = await getPool();
@@ -84,6 +100,21 @@ router.get("/:id", async (req, res) => {
     }
 
     const row = result.recordset[0];
+
+    // Vérifier que l'employé ne peut voir que SA réservation
+    const role = req.user.role || "employe";
+    if (role === "employe") {
+      const userName = req.user.cognomeNome || "";
+      if (
+        row.UtentePrenotazione &&
+        row.UtentePrenotazione.trim() !== userName
+      ) {
+        return res
+          .status(403)
+          .json({ error: "ACCÈS REFUSÉ — Ce n'est pas votre réservation" });
+      }
+    }
+
     const resa = {
       IdPrenotazione: row.IdPrenotazione,
       IdAuto: row.IdAuto,
@@ -106,7 +137,6 @@ router.get("/:id", async (req, res) => {
       InsertData: row.InsertData,
     };
 
-    // Voyageurs
     if (resa.GuidTable) {
       try {
         const voyResult = await pool
@@ -131,11 +161,9 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST /api/reservations — Créer une réservation
-// Appelle ai_insert_reservation + ai_insert_voyager pour chaque voyageur
 router.post("/", async (req, res) => {
   try {
     const {
-      utentePrenotazione,
       dataInizio,
       dataFine,
       giorni,
@@ -143,10 +171,12 @@ router.post("/", async (req, res) => {
       destinazione,
       usineRiva,
       idAuto,
-      voyageurs, // tableau de noms ["DUPONT Jean", "MARTIN Pierre"]
+      voyageurs,
     } = req.body;
 
-    // Validations
+    // Le nom du demandeur vient du JWT (pas du formulaire = plus sécurisé)
+    const utentePrenotazione = req.user.cognomeNome || "Inconnu";
+
     if (!idAuto)
       return res.status(400).json({ error: "CHOISISSEZ UNE VOITURE" });
     if (!dataInizio || !dataFine)
@@ -156,8 +186,6 @@ router.post("/", async (req, res) => {
 
     const pool = await getPool();
 
-    // Générer le numéro progressif
-    // Comme : ai_get_progressivo_prenotazione
     const annoPrenotazione = new Date().getFullYear();
     let progressivo = 1;
 
@@ -166,21 +194,16 @@ router.post("/", async (req, res) => {
         .request()
         .input("AnnoPrenotazione", sql.Int, annoPrenotazione)
         .execute("ai_get_progressivo_prenotazione");
-
       if (
         progResult.recordset.length > 0 &&
-        progResult.recordset[0].MaxProgressivo
+        progResult.recordset[0].ProgressivoPrenotazione
       ) {
-        progressivo = progResult.recordset[0].MaxProgressivo + 1;
+        progressivo = progResult.recordset[0].ProgressivoPrenotazione + 1;
       }
-    } catch {
-      // Si la SP n'existe pas encore, on commence à 1
-    }
+    } catch {}
 
-    // Générer le GuidTable (pour lier les voyageurs)
     const guidTable = "GT" + Date.now().toString().slice(-8);
 
-    // Insérer la réservation
     await pool
       .request()
       .input("UtentePrenotazione", sql.NVarChar, utentePrenotazione)
@@ -196,7 +219,6 @@ router.post("/", async (req, res) => {
       .input("IdAuto", sql.Int, parseInt(idAuto))
       .execute("ai_insert_reservation");
 
-    // Insérer les voyageurs
     if (voyageurs && voyageurs.length > 0) {
       for (const voyageur of voyageurs) {
         if (voyageur && voyageur.trim()) {
@@ -212,6 +234,13 @@ router.post("/", async (req, res) => {
         }
       }
     }
+
+    console.log(
+      "✅ Réservation créée par",
+      utentePrenotazione,
+      "— N°",
+      progressivo + "/" + annoPrenotazione,
+    );
 
     res.status(201).json({
       message: `RÉSERVATION N° ${progressivo}/${annoPrenotazione} CRÉÉE AVEC SUCCÈS`,

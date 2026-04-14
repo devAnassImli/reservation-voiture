@@ -18,23 +18,73 @@ function Layout({ children, onNavigate }) {
     onNavigate("login");
   };
 
-  const menuItems = [
-    {
+  // ── Menu selon le rôle ──
+  const role = user?.role || "employe";
+
+  const menuItems = [];
+
+  // ADMIN : tout voir
+  if (role === "admin") {
+    menuItems.push({
       label: "PARAMÉTRISATION",
       children: [
         { label: "Marques auto", page: "marques" },
         { label: "Modèles auto", page: "modeles" },
         { label: "Parc auto", page: "parc-auto" },
       ],
-    },
-    {
+    });
+    menuItems.push({
       label: "RÉSERVATIONS",
       children: [
         { label: "Nouvelle réservation", page: "reservation-new" },
-        { label: "Modifier réservation", page: "reservation-edit" },
+        { label: "Toutes les réservations", page: "reservation-edit" },
       ],
-    },
-  ];
+    });
+  }
+
+  // EMPLOYÉ : seulement réserver et voir ses réservations
+  if (role === "employe") {
+    menuItems.push({
+      label: "RÉSERVATIONS",
+      children: [
+        { label: "Nouvelle réservation", page: "reservation-new" },
+        { label: "Mes réservations", page: "reservation-edit" },
+      ],
+    });
+  }
+
+  // RH : valider les réservations
+  if (role === "rh") {
+    menuItems.push({
+      label: "RÉSERVATIONS",
+      children: [
+        { label: "Toutes les réservations", page: "reservation-edit" },
+      ],
+    });
+  }
+
+  // GARDIEN : voir les réservations du jour
+  if (role === "gardien") {
+    menuItems.push({
+      label: "RÉSERVATIONS",
+      children: [{ label: "Réservations en cours", page: "reservation-edit" }],
+    });
+  }
+
+  // Badge rôle
+  const roleLabels = {
+    admin: "ADMINISTRATEUR",
+    employe: "EMPLOYÉ",
+    rh: "RESSOURCES HUMAINES",
+    gardien: "GARDIEN",
+  };
+
+  const roleColors = {
+    admin: "#dc3545",
+    employe: "#2E75B6",
+    rh: "#b8860b",
+    gardien: "#1a7a2e",
+  };
 
   return (
     <div className="layout-container">
@@ -48,7 +98,23 @@ function Layout({ children, onNavigate }) {
             <div className="header-title">RÉSERVATION DE VOITURE</div>
           </div>
           <div className="header-right">
-            <div className="header-user">user: {user?.cognomeNome}</div>
+            <div className="header-user">
+              {user?.cognomeNome}
+              <span
+                style={{
+                  marginLeft: 8,
+                  background: roleColors[role] || "#666",
+                  color: "#fff",
+                  padding: "2px 8px",
+                  borderRadius: 4,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                }}
+              >
+                {roleLabels[role] || role}
+              </span>
+            </div>
             <div className="header-email">{user?.email}</div>
             <button onClick={handleLogout} className="header-logout-btn">
               🔓 Déconnexion
@@ -85,7 +151,6 @@ function Layout({ children, onNavigate }) {
         </div>
       </div>
       <div className="page-content">{children}</div>
-
       <div
         style={{
           textAlign: "center",
