@@ -167,3 +167,28 @@ export async function updateReservation(id, data) {
     body: JSON.stringify(data),
   });
 }
+export async function updateMarque(id, marca) {
+  return request(`/marques/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ marca }),
+  });
+}
+
+export async function updateModele(id, data) {
+  return request(`/modeles/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateVoiture(id, data) {
+  return request(`/voitures/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+
+  
+}
+
+export const getVoituresFlotte = getFlotte;
+export const createReservation = insertReservation;

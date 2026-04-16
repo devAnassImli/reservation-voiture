@@ -28,18 +28,32 @@ function ParcAutoPage() {
     finally { setLoading(false); }
   };
 
-  const handleInsert = async () => {
+const handleInsert = async () => {
     setMessage("");
     if (selectedModello === "0") { setMessage("CHOISISSEZ UN MODÈLE"); setMessageType("error"); return; }
     if (!newTarga.trim()) { setMessage("ENTREZ UNE PLAQUE"); setMessageType("error"); return; }
 
     try {
-      await api.insertVoiture({
-        idModello: parseInt(selectedModello),
-        targa: newTarga.trim(),
-        rottamato: newRottamato,
-      });
-      setMessage("VOITURE AJOUTÉE AVEC SUCCÈS"); setMessageType("success");
+      if (selectedId) {
+        // MODE MODIFICATION (PUT)
+        await api.updateVoiture(selectedId, {
+          idModello: parseInt(selectedModello),
+          targa: newTarga.trim(),
+          rottamato: newRottamato ? 1 : 0,
+          priorite: newPriorite,
+        });
+        setMessage("VOITURE MODIFIÉE AVEC SUCCÈS");
+      } else {
+        // MODE INSERTION (POST)
+        await api.insertVoiture({
+          idModello: parseInt(selectedModello),
+          targa: newTarga.trim(),
+          rottamato: newRottamato ? 1 : 0,
+          priorite: newPriorite,
+        });
+        setMessage("VOITURE AJOUTÉE AVEC SUCCÈS");
+      }
+      setMessageType("success");
       resetForm();
       await loadData();
     } catch (err) { setMessage(err.message); setMessageType("error"); }

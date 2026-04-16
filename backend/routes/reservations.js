@@ -185,7 +185,31 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "ENTREZ UNE DESTINATION" });
 
     const pool = await getPool();
+ // ── VÉRIFICATION DISPONIBILITÉ ──
+    // On vérifie qu'aucune réservation n'existe déjà pour cette voiture
+    // dans l'intervalle de dates demandé
+    const dispoCheck = await pool.request()
+      .input('IdAuto', sql.Int, parseInt(idAuto))
+      .input('DateDebut', sql.DateTime, new Date(dataInizio))
+      .input('DateFin', sql.DateTime, new Date(dataFine))
+      .query(`
+        SELECT IdPrenotazione, UtentePrenotazione, DataInizio, DataFine
+        FROM utPrenotazioni
+        WHERE IdAuto = @IdAuto
+          AND DataFine >= @DateDebut
+          AND DataInizio <= @DateFin
+      `);
 
+    if (dispoCheck.recordset.length > 0) {
+      const conflit = dispoCheck.recordset[0];
+      const dateDebutConflit = new Date(conflit.DataInizio).toLocaleDateString('fr-FR');
+      const dateFinConflit = new Date(conflit.DataFine).toLocaleDateString('fr-FR');
+      return res.status(409).json({
+        error: 'VOITURE INDISPONIBLE — Cette voiture est déjà réservée du '
+          + dateDebutConflit + ' au ' + dateFinConflit
+          + ' par ' + (conflit.UtentePrenotazione ? conflit.UtentePrenotazione.trim() : 'un autre employé')
+      });
+    }
     const annoPrenotazione = new Date().getFullYear();
     let progressivo = 1;
 

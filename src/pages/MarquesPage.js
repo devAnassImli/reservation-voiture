@@ -43,6 +43,7 @@ function MarquesPage() {
   };
 
   // ── Insérer une marque ──
+  // ── Insérer OU Modifier une marque ──
   const handleInsert = async () => {
     setMessage("");
     if (!newMarque.trim()) {
@@ -52,12 +53,19 @@ function MarquesPage() {
     }
 
     try {
-      await api.insertMarque(newMarque.trim());
-      setMessage("MARQUE AJOUTÉE AVEC SUCCÈS");
+      if (selectedId) {
+        // MODE MODIFICATION (PUT)
+        await api.updateMarque(selectedId, newMarque.trim());
+        setMessage("MARQUE MODIFIÉE AVEC SUCCÈS");
+      } else {
+        // MODE INSERTION (POST)
+        await api.insertMarque(newMarque.trim());
+        setMessage("MARQUE AJOUTÉE AVEC SUCCÈS");
+      }
       setMessageType("success");
       setNewMarque("");
       setSelectedId(null);
-      await loadMarques(); // recharge la liste (comme CaricaMarcheAuto après insert)
+      await loadMarques();
     } catch (err) {
       setMessage(err.message);
       setMessageType("error");

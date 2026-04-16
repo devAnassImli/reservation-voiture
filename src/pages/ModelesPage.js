@@ -33,7 +33,7 @@ function ModelesPage() {
     }
   };
 
-  const handleInsert = async () => {
+ const handleInsert = async () => {
     setMessage("");
     if (selectedMarca === "0") {
       setMessage("CHOISISSEZ UNE MARQUE");
@@ -47,12 +47,23 @@ function ModelesPage() {
     }
 
     try {
-      await api.insertModele(
-        parseInt(selectedMarca),
-        newModele.trim(),
-        newCilindrata ? parseInt(newCilindrata) : null,
-      );
-      setMessage("MODÈLE AJOUTÉ AVEC SUCCÈS");
+      if (selectedId) {
+        // MODE MODIFICATION (PUT)
+        await api.updateModele(selectedId, {
+          idMarca: parseInt(selectedMarca),
+          modello: newModele.trim(),
+          cilindrata: newCilindrata ? parseInt(newCilindrata) : 0,
+        });
+        setMessage("MODÈLE MODIFIÉ AVEC SUCCÈS");
+      } else {
+        // MODE INSERTION (POST)
+        await api.insertModele(
+          parseInt(selectedMarca),
+          newModele.trim(),
+          newCilindrata ? parseInt(newCilindrata) : null,
+        );
+        setMessage("MODÈLE AJOUTÉ AVEC SUCCÈS");
+      }
       setMessageType("success");
       resetForm();
       await loadData();
