@@ -39,19 +39,7 @@ function LoginPage({ onNavigate }) {
     }
   };
 
-  const handleDemoLogin = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      const result = await api.loginDemo();
-      login(result.data, result.token);
-      onNavigate("home");
-    } catch (err) {
-      setError(err.message || "ERREUR SERVEUR");
-    } finally {
-      setLoading(false);
-    }
-  };
+ 
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") handleLogin();
@@ -282,21 +270,7 @@ function LoginPage({ onNavigate }) {
             >
               {loading ? "Connexion..." : "OK"}
             </button>
-            <button
-              onClick={handleDemoLogin}
-              disabled={loading}
-              style={{
-                background: "transparent",
-                color: "#555",
-                border: "1px solid #888",
-                borderRadius: 4,
-                padding: "8px 30px",
-                fontSize: 12,
-                cursor: "pointer",
-              }}
-            >
-              Mode démonstration (sans mot de passe)
-            </button>
+            
           </div>
         </div>
       </div>

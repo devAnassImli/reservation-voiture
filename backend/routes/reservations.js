@@ -253,5 +253,90 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// DELETE /api/reservations/:id — Supprimer une réservation
+router.delete("/:id", async (req, res) => {
+  try {
+    const pool = await getPool();
+    const idPrenotazione = parseInt(req.params.id);
+    const role = req.user.role || "employe";
+    const userName = req.user.cognomeNome || "";
 
+    // Vérifier que c'est sa réservation (si employé)
+    if (role === "employe") {
+      const check = await pool
+        .request()
+        .input("IdPrenotazione", sql.Int, idPrenotazione)
+        .query(
+          "SELECT UtentePrenotazione FROM utPrenotazioni WHERE IdPrenotazione = @IdPrenotazione",
+        );
+
+      if (check.recordset.length === 0) {
+        return res.status(404).json({ error: "Réservation non trouvée" });
+      }
+      if (check.recordset[0].UtentePrenotazione.trim() !== userName) {
+        return res.status(403).json({ error: "ACCÈS REFUSÉ" });
+      }
+    }
+
+    // Supprimer les voyageurs puis la réservation
+    await pool.request().input("IdPrenotazione", sql.Int, idPrenotazione)
+      .query(`
+        DELETE FROM utVoyagers WHERE GuidTable = 
+          (SELECT GuidTable FROM utPrenotazioni WHERE IdPrenotazione = @IdPrenotazione);
+        DELETE FROM utPrenotazioni WHERE IdPrenotazione = @IdPrenotazione;
+      `);
+
+    console.log("✅ Réservation supprimée:", idPrenotazione, "par", userName);
+    res.json({ message: "RÉSERVATION SUPPRIMÉE" });
+  } catch (err) {
+    console.error("Erreur DELETE:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/reservations/:id — Modifier une réservation
+router.put("/:id", async (req, res) => {
+  try {
+    const pool = await getPool();
+    const idPrenotazione = parseInt(req.params.id);
+    const { dataInizio, dataFine, giorni, destinazione, kmEstime } = req.body;
+    const role = req.user.role || "employe";
+    const userName = req.user.cognomeNome || "";
+
+    if (role === "employe") {
+      const check = await pool
+        .request()
+        .input("IdPrenotazione", sql.Int, idPrenotazione)
+        .query(
+          "SELECT UtentePrenotazione FROM utPrenotazioni WHERE IdPrenotazione = @IdPrenotazione",
+        );
+      if (
+        check.recordset.length === 0 ||
+        check.recordset[0].UtentePrenotazione.trim() !== userName
+      ) {
+        return res.status(403).json({ error: "ACCÈS REFUSÉ" });
+      }
+    }
+
+    await pool
+      .request()
+      .input("IdPrenotazione", sql.Int, idPrenotazione)
+      .input("DataInizio", sql.DateTime, new Date(dataInizio))
+      .input("DataFine", sql.DateTime, new Date(dataFine))
+      .input("Giorni", sql.Int, giorni || 1)
+      .input("Destinazione", sql.NVarChar, destinazione)
+      .input("KmEstime", sql.Int, kmEstime || 0).query(`
+        UPDATE utPrenotazioni 
+        SET DataInizio = @DataInizio, DataFine = @DataFine, Giorni = @Giorni,
+            Destinazione = @Destinazione, KmEstime = @KmEstime
+        WHERE IdPrenotazione = @IdPrenotazione
+      `);
+
+    console.log("✅ Réservation modifiée:", idPrenotazione);
+    res.json({ message: "RÉSERVATION MODIFIÉE" });
+  } catch (err) {
+    console.error("Erreur PUT:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 module.exports = router;

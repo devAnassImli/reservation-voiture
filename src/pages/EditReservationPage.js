@@ -54,54 +54,41 @@ function EditReservationPage() {
     setMessage("");
   };
 
-  const handleSaveEdit = () => {
-    if (!editDateDebut || !editDateFin || !editDestination.trim()) {
-      setMessage("REMPLISSEZ TOUS LES CHAMPS");
-      setMessageType("error");
-      return;
-    }
-    const jours =
-      Math.ceil(
-        (new Date(editDateFin) - new Date(editDateDebut)) /
-          (1000 * 60 * 60 * 24),
-      ) + 1;
-    if (jours <= 0) {
-      setMessage("LA DATE DE FIN DOIT ÊTRE APRÈS LA DATE DE DÉBUT");
-      setMessageType("error");
-      return;
-    }
-    setReservations(
-      reservations.map((r) => {
-        if (r.IdPrenotazione === selectedResa.IdPrenotazione) {
-          return {
-            ...r,
-            DataInizio: editDateDebut,
-            DataFine: editDateFin,
-            Giorni: jours,
-            Destinazione: editDestination.trim(),
-            KmEstime: editKm ? parseInt(editKm) : 0,
-          };
-        }
-        return r;
-      }),
-    );
-    setMessage("RÉSERVATION MODIFIÉE");
-    setMessageType("success");
-    setViewMode("list");
-    setSelectedResa(null);
-  };
+ 
+const handleSaveEdit = async () => {
+  if (!editDateDebut || !editDateFin || !editDestination.trim()) {
+    setMessage("REMPLISSEZ TOUS LES CHAMPS"); setMessageType("error"); return;
+  }
+  const jours = Math.ceil((new Date(editDateFin) - new Date(editDateDebut)) / (1000 * 60 * 60 * 24)) + 1;
+  if (jours <= 0) { setMessage("LA DATE DE FIN DOIT ÊTRE APRÈS LA DATE DE DÉBUT"); setMessageType("error"); return; }
 
-  const handleDelete = (id) => {
-    if (
-      window.confirm("Êtes-vous sûr de vouloir supprimer cette réservation ?")
-    ) {
-      setReservations(reservations.filter((r) => r.IdPrenotazione !== id));
-      setMessage("RÉSERVATION SUPPRIMÉE");
-      setMessageType("success");
-      setViewMode("list");
-      setSelectedResa(null);
-    }
-  };
+  try {
+    await api.updateReservation(selectedResa.IdPrenotazione, {
+      dataInizio: editDateDebut,
+      dataFine: editDateFin,
+      giorni: jours,
+      destinazione: editDestination.trim(),
+      kmEstime: editKm ? parseInt(editKm) : 0,
+    });
+    setMessage("RÉSERVATION MODIFIÉE AVEC SUCCÈS"); setMessageType("success");
+    await loadReservations();
+    setViewMode("list"); setSelectedResa(null);
+  } catch (err) {
+    setMessage("ERREUR: " + err.message); setMessageType("error");
+  }
+};
+
+const handleDelete = async (id) => {
+  if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette réservation ?")) return;
+  try {
+    await api.deleteReservation(id);
+    setMessage("RÉSERVATION SUPPRIMÉE"); setMessageType("success");
+    await loadReservations();
+    setViewMode("list"); setSelectedResa(null);
+  } catch (err) {
+    setMessage("ERREUR: " + err.message); setMessageType("error");
+  }
+};
 
   const handleBackToList = () => {
     setViewMode("list");

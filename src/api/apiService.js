@@ -156,3 +156,14 @@ export async function insertReservation(data) {
     body: JSON.stringify(data),
   });
 }
+
+export async function deleteReservation(id) {
+  return request(`/reservations/${id}`, { method: "DELETE" });
+}
+
+export async function updateReservation(id, data) {
+  return request(`/reservations/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
