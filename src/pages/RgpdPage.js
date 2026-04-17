@@ -245,7 +245,7 @@ function RgpdPage({ onNavigate }) {
           <br />
           <strong>Dernière mise à jour :</strong> Avril 2026
           <br />
-          <strong>Développeur :</strong> IMLI Anass — Bachelor CDA 2025/2026
+          <strong>Développeur :</strong> IMLI Anass —  2025/2026
         </div>
       </div>
     </div>

@@ -184,6 +184,12 @@ export async function updateVoiture(id, data) {
     body: JSON.stringify(data),
   });
 }
+export async function validerReservation(id, validationRH, note) {
+  return request(`/reservations/${id}/validation`, {
+    method: "PATCH",
+    body: JSON.stringify({ validationRH, note }),
+  });
+}
 
 export const getVoituresFlotte = getFlotte;
 export const createReservation = insertReservation;

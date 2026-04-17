@@ -22,21 +22,61 @@ router.get("/", async (req, res) => {
 
     let result;
 
-    if (role === "admin" || role === "rh") {
-      // Admin et RH voient TOUT
-      result = await pool.request().execute("ai_get_reservation_complete");
-    } else if (role === "gardien") {
-      // Gardien voit les réservations en cours
-      result = await pool.request().execute("ai_visualiser_reservation");
-    } else {
-      // Employé voit uniquement SES réservations
-      result = await pool.request().execute("ai_get_reservation_complete");
-      // Filtre côté serveur par le nom de l'utilisateur
+//     if (role === "admin" || role === "rh") {
+//       // Admin et RH voient TOUT
+//       // CA ETE REMPLACEE CA PAR CE QUI EN BAS : result = await pool.request().execute("ai_get_reservation_complete");
+//       result = await pool.request().query(`
+//   SELECT p.*, 
+//          a.Targa, a.Priorite,
+//          m.Modello, m.Cilindrata,
+//          ma.Marca
+//   FROM utPrenotazioni p
+//   LEFT JOIN utAuto a ON p.IdAuto = a.IdAuto
+//   LEFT JOIN utModelli m ON a.IdModello = m.IdModello
+//   LEFT JOIN utMarche ma ON m.IdMarca = ma.IdMarca
+//   ORDER BY p.IdPrenotazione DESC
+// `);
+//     } else if (role === "gardien") {
+//       // Gardien voit les réservations en cours
+//       // CA ETE REMPLACE PAR CE QUI EST EN BAS result = await pool.request().execute("ai_visualiser_reservation");
+//       result = await pool.request().query(`
+//   SELECT p.*, 
+//          a.Targa, a.Priorite,
+//          m.Modello, m.Cilindrata,
+//          ma.Marca
+//   FROM utPrenotazioni p
+//   LEFT JOIN utAuto a ON p.IdAuto = a.IdAuto
+//   LEFT JOIN utModelli m ON a.IdModello = m.IdModello
+//   LEFT JOIN utMarche ma ON m.IdMarca = ma.IdMarca
+//   ORDER BY p.IdPrenotazione DESC
+// `);
+//     } else {
+//       // Employé voit uniquement SES réservations
+//       result = await pool.request().execute("ai_get_reservation_complete");
+//       // Filtre côté serveur par le nom de l'utilisateur
+//       result.recordset = result.recordset.filter(
+//         (r) => r.UtentePrenotazione && r.UtentePrenotazione.trim() === userName,
+//       );
+//     }
+// Même requête JOIN pour TOUS les rôles
+    result = await pool.request().query(`
+      SELECT p.*, 
+             a.Targa, a.Priorite,
+             m.Modello, m.Cilindrata,
+             ma.Marca
+      FROM utPrenotazioni p
+      LEFT JOIN utAuto a ON p.IdAuto = a.IdAuto
+      LEFT JOIN utModelli m ON a.IdModello = m.IdModello
+      LEFT JOIN utMarche ma ON m.IdMarca = ma.IdMarca
+      ORDER BY p.IdPrenotazione DESC
+    `);
+
+    // Filtrage selon le rôle
+    if (role === 'employe') {
       result.recordset = result.recordset.filter(
-        (r) => r.UtentePrenotazione && r.UtentePrenotazione.trim() === userName,
+        r => r.UtentePrenotazione && r.UtentePrenotazione.trim() === userName
       );
     }
-
     const reservations = result.recordset.map((row) => ({
       IdPrenotazione: row.IdPrenotazione,
       IdAuto: row.IdAuto,
@@ -360,6 +400,37 @@ router.put("/:id", async (req, res) => {
     res.json({ message: "RÉSERVATION MODIFIÉE" });
   } catch (err) {
     console.error("Erreur PUT:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+// PATCH /api/reservations/:id/validation — Valider ou refuser (RH uniquement)
+router.patch('/:id/validation', async (req, res) => {
+  try {
+    const role = req.user.role || 'employe';
+    if (role !== 'rh' && role !== 'admin') {
+      return res.status(403).json({ error: 'ACCÈS REFUSÉ — Seul le RH peut valider' });
+    }
+
+    const { validationRH, note } = req.body;
+    const id = parseInt(req.params.id);
+    const pool = await getPool();
+
+    await pool.request()
+      .input('IdPrenotazione', sql.Int, id)
+      .input('ValidationRH', sql.Int, validationRH) // 1 = validée, 2 = refusée
+      .input('Note', sql.NVarChar, note || '')
+      .input('DateValidation', sql.DateTime, new Date())
+      .query(`
+        UPDATE utPrenotazioni 
+        SET ValidationRH = @ValidationRH, Note = @Note, DateValidation = @DateValidation
+        WHERE IdPrenotazione = @IdPrenotazione
+      `);
+
+    const statut = validationRH === 1 ? 'VALIDÉE' : 'REFUSÉE';
+    console.log('✅ Réservation', id, statut, 'par', req.user.cognomeNome);
+    res.json({ message: 'RÉSERVATION ' + statut + ' PAR LES RH' });
+  } catch (err) {
+    console.error('Erreur validation:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
