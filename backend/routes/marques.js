@@ -1,90 +1,118 @@
-// ─────────────────────────────────────────────
-// routes/marques.js — CRUD Marques auto
-//
-// Équivalent de par_marche.aspx.cs
-//
-// En C# :
-//   DataSet ds = ConfigurationHelper.DBHelper.DoJob("get_marche", htValues);
-//   → appelle ff_get_marche
-//
-// En Node.js :
-//   GET /api/marques → pool.request().execute('ff_get_marche')
-//
-// Correspondances :
-//   CaricaMarcheAuto()       → GET /api/marques
-//   btnInserimento_Click     → POST /api/marques
-//   (suppression)            → DELETE /api/marques/:id
-// ─────────────────────────────────────────────
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { sql, getPool } = require('../config/db');
+const { sql, getPool } = require("../config/db");
 
-// GET /api/marques — Liste toutes les marques
-// Équivalent de : ConfigurationHelper.DBHelper.DoJob("get_marche", htValues)
-router.get('/', async (req, res) => {
+// GET /api/marques
+router.get("/", async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await pool.request().execute('ff_get_marche');
-    
-    // Nettoyer les espaces (nchar ajoute des espaces à droite)
-    const marques = result.recordset.map(row => ({
+    const result = await pool.request().execute("ff_get_marche");
+    const marques = result.recordset.map((row) => ({
       IdMarca: row.IdMarca,
-      Marca: row.Marca ? row.Marca.trim() : '',
+      Marca: row.Marca ? row.Marca.trim() : "",
     }));
-
     res.json(marques);
   } catch (err) {
-    console.error('Erreur GET marques:', err.message);
+    console.error("Erreur GET marques:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// POST /api/marques — Insérer une nouvelle marque
-// Équivalent de : ConfigurationHelper.DBHelper.DoJob("insert_marca", htValues)
-router.post('/', async (req, res) => {
+// POST /api/marques — Insérer une marque
+router.post("/", async (req, res) => {
   try {
     const { marca } = req.body;
-
     if (!marca || !marca.trim()) {
-      return res.status(400).json({ error: 'ENTREZ UNE MARQUE' });
+      return res.status(400).json({ error: "NOM DE MARQUE REQUIS" });
     }
-
     const pool = await getPool();
 
-    // Vérifier si la marque existe déjà (comme ton foreach en C#)
-    const existing = await pool.request().execute('ff_get_marche');
-    const existe = existing.recordset.some(
-      row => row.Marca && row.Marca.trim().toUpperCase() === marca.trim().toUpperCase()
-    );
-
-    if (existe) {
-      return res.status(409).json({ error: 'MARQUE DÉJÀ EXISTANTE' });
+    // Vérifier doublon
+    const check = await pool
+      .request()
+      .input("Marca", sql.NVarChar, marca.trim().toUpperCase())
+      .query("SELECT IdMarca FROM utMarche WHERE UPPER(RTRIM(Marca)) = @Marca");
+    if (check.recordset.length > 0) {
+      return res.status(409).json({ error: "MARQUE DÉJÀ EXISTANTE" });
     }
 
-    // Insérer
-    await pool.request()
-      .input('Marca', sql.NVarChar, marca.trim().toUpperCase())
-      .execute('ff_insert_marca');
-
-    res.status(201).json({ message: 'MARQUE AJOUTÉE AVEC SUCCÈS' });
+    await pool
+      .request()
+      .input("Marca", sql.NVarChar, marca.trim().toUpperCase())
+      .execute("ff_insert_marca");
+    res.status(201).json({ message: "MARQUE AJOUTÉE AVEC SUCCÈS" });
   } catch (err) {
-    console.error('Erreur POST marques:', err.message);
+    console.error("Erreur POST marques:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/marques/:id — Modifier une marque
+router.put("/:id", async (req, res) => {
+  try {
+    const { marca } = req.body;
+    const id = parseInt(req.params.id);
+    if (!marca || !marca.trim()) {
+      return res.status(400).json({ error: "NOM DE MARQUE REQUIS" });
+    }
+    const pool = await getPool();
+
+    // Vérifier doublon (sauf elle-même)
+    const check = await pool
+      .request()
+      .input("Marca", sql.NVarChar, marca.trim().toUpperCase())
+      .input("IdMarca", sql.Int, id)
+      .query(
+        "SELECT IdMarca FROM utMarche WHERE UPPER(RTRIM(Marca)) = @Marca AND IdMarca != @IdMarca",
+      );
+    if (check.recordset.length > 0) {
+      return res.status(409).json({ error: "MARQUE DÉJÀ EXISTANTE" });
+    }
+
+    await pool
+      .request()
+      .input("Marca", sql.NVarChar, marca.trim().toUpperCase())
+      .input("IdMarca", sql.Int, id)
+      .query("UPDATE utMarche SET Marca = @Marca WHERE IdMarca = @IdMarca");
+
+    res.json({ message: "MARQUE MODIFIÉE AVEC SUCCÈS" });
+  } catch (err) {
+    console.error("Erreur PUT marques:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
 // DELETE /api/marques/:id — Supprimer une marque
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
+    const id = parseInt(req.params.id);
     const pool = await getPool();
-    await pool.request()
-      .input('IdMarca', sql.Int, parseInt(req.params.id))
-      .execute('ai_delete_marque');
 
-    res.json({ message: 'MARQUE SUPPRIMÉE' });
+    // Vérifier si des modèles utilisent cette marque
+    const check = await pool
+      .request()
+      .input("IdMarca", sql.Int, id)
+      .query("SELECT COUNT(*) as nb FROM utModelli WHERE IdMarca = @IdMarca");
+    if (check.recordset[0].nb > 0) {
+      return res.status(409).json({
+        error:
+          "IMPOSSIBLE DE SUPPRIMER — Cette marque est utilisée par " +
+          check.recordset[0].nb +
+          " modèle(s). Supprimez d'abord les modèles associés.",
+      });
+    }
+
+    const result = await pool
+      .request()
+      .input("IdMarca", sql.Int, id)
+      .query("DELETE FROM utMarche WHERE IdMarca = @IdMarca");
+
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ error: "MARQUE NON TROUVÉE" });
+    }
+    res.json({ message: "MARQUE SUPPRIMÉE AVEC SUCCÈS" });
   } catch (err) {
-    console.error('Erreur DELETE marques:', err.message);
+    console.error("Erreur DELETE marques:", err.message);
     res.status(500).json({ error: err.message });
   }
 });

@@ -19,14 +19,14 @@ function getToken() {
 
 // ── Fonction utilitaire pour les requêtes ──
 async function request(url, options = {}) {
-  const token = getToken();
+  
+const token = getToken();
 
   const headers = {
     "Content-Type": "application/json",
     ...options.headers,
   };
 
-  // Ajoute le token JWT si on en a un
   if (token) {
     headers["Authorization"] = "Bearer " + token;
   }
@@ -36,30 +36,27 @@ async function request(url, options = {}) {
     headers,
   });
 
-  // Si 401 ou 403 → token expiré → déconnexion
-  // Si le serveur ne répond pas (pas de JSON)
-  if (!response.ok && response.status === 500) {
-    try {
-      const data = await response.json();
-      throw new Error(data.error || "Erreur serveur");
-    } catch {
-      throw new Error("Serveur indisponible — utilisez le mode démo");
-    }
-  }
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("rv_user");
     localStorage.removeItem("rv_token");
-    window.location.reload(); // force retour au login
+    window.location.reload();
     throw new Error("SESSION EXPIRÉE — Reconnectez-vous");
   }
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "Erreur serveur");
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Erreur serveur — réponse invalide (code " + response.status + ")");
   }
 
-  return data;
+  if (!response.ok) {
+    throw new Error(data.error || "Erreur serveur (code " + response.status + ")");
+  }
+return data ; 
+  
+
+ 
 }
 
 // ══════════════════════════════════════
@@ -186,8 +183,6 @@ export async function updateVoiture(id, data) {
     method: "PUT",
     body: JSON.stringify(data),
   });
-
-  
 }
 
 export const getVoituresFlotte = getFlotte;
