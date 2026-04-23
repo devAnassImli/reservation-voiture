@@ -6,11 +6,11 @@
 const sql = require('mssql');
 
 const config = {
-  server: process.env.DB_SERVER,
-  database: process.env.DB_DATABASE,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  port: parseInt(process.env.DB_PORT) || 1433,
+  server: process.env.DB_SERVER,              // 10.165.150.20/sqlexpress
+  database: process.env.DB_DATABASE,          // db_database = SAM_MT_ReservationAuto
+  user: process.env.DB_USER,                  // user_milano
+  password: process.env.DB_PASSWORD,          //samsam 
+  port: parseInt(process.env.DB_PORT) || 1433, 
   options: {
     encrypt: false,
     trustServerCertificate: true,

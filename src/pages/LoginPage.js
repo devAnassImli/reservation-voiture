@@ -25,12 +25,12 @@ function LoginPage({ onNavigate }) {
     setLoading(true);
     try {
       const result = await api.login(username.trim(), password.trim());
-      if (!result.success) {
-        setError(result.error || "ERREUR");
+      if (!result.token) {
+        setError(result.error || "ERREUR DE CONNEXION");
         setLoading(false);
         return;
       }
-      login(result.data, result.token);
+      login(result.user, result.token);
       onNavigate("home");
     } catch (err) {
       setError(err.message || "ERREUR SERVEUR");
@@ -38,8 +38,6 @@ function LoginPage({ onNavigate }) {
       setLoading(false);
     }
   };
-
- 
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") handleLogin();
@@ -270,7 +268,6 @@ function LoginPage({ onNavigate }) {
             >
               {loading ? "Connexion..." : "OK"}
             </button>
-            
           </div>
         </div>
       </div>
