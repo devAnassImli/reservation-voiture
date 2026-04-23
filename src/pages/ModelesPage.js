@@ -11,7 +11,7 @@ function ModelesPage() {
   const [messageType, setMessageType] = useState("");
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [confirmDelete, setConfirmDelete] = useState(null);
   useEffect(() => {
     loadData();
   }, []);
@@ -33,7 +33,7 @@ function ModelesPage() {
     }
   };
 
- const handleInsert = async () => {
+  const handleInsert = async () => {
     setMessage("");
     if (selectedMarca === "0") {
       setMessage("CHOISISSEZ UNE MARQUE");
@@ -75,8 +75,12 @@ function ModelesPage() {
 
   const handleDelete = async () => {
     if (selectedId === null) return;
+    setConfirmDelete(selectedId);
+  };
+
+  const confirmDeleteModele = async () => {
     try {
-      await api.deleteModele(selectedId);
+      await api.deleteModele(confirmDelete);
       setMessage("MODÈLE SUPPRIMÉ");
       setMessageType("success");
       resetForm();
@@ -84,6 +88,8 @@ function ModelesPage() {
     } catch (err) {
       setMessage(err.message);
       setMessageType("error");
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -235,6 +241,75 @@ function ModelesPage() {
           </div>
         </div>
       </div>
+      {confirmDelete && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 8,
+              padding: 30,
+              maxWidth: 450,
+              width: "90%",
+              textAlign: "center",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div style={{ fontSize: 40, marginBottom: 16 }}>⚠️</div>
+            <h3 style={{ margin: "0 0 12px", color: "#1a3a5c" }}>
+              Confirmer la suppression
+            </h3>
+            <p style={{ color: "#666", marginBottom: 24 }}>
+              Etes-vous sur de vouloir supprimer ce modele  ? Cette action est
+              irreversible.
+            </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+              <button
+                onClick={() => setConfirmDelete(null)}
+                style={{
+                  background: "#f0f0f0",
+                  color: "#333",
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "10px 30px",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                ANNULER
+              </button>
+              <button
+                onClick={confirmDeleteModele}
+                style={{
+                  background: "#dc3545",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "10px 30px",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                SUPPRIMER{" "}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
